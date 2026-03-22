@@ -44,7 +44,7 @@ fs.writeJsonSync('build/package.json', {
   },
   license: 'MIT',
   author: 'Matthieu Symoens',
-  description: 'Node.js app framework',
+  description: 'Node.js App Framework',
   keywords: ['ape', 'framework', 'nodejs'],
   repository: {
     type: 'git',
@@ -58,5 +58,5 @@ fs.writeJsonSync('build/package.json', {
   exports: getExports('src'),
 }, { spaces: 2 })
 
-fs.copySync('LICENSE', 'build/LICENSE')
+fs.copySync('../LICENSE', 'build/LICENSE')
 fs.copySync('README.md', 'build/README.md')
