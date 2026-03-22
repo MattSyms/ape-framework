@@ -1,4 +1,4 @@
-# Ape Framework ESLint configuration
+# Ape Framework ESLint Configuration
 
 Ape Framework [ESLint](https://eslint.org) configuration.
 
