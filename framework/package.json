@@ -1,5 +1,5 @@
 {
-  "name": "apeframework",
+  "name": "apeframework-framework",
   "private": true,
   "scripts": {
     "update": "ncu",

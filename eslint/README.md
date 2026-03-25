@@ -4,7 +4,7 @@ Ape Framework [ESLint](https://eslint.org) configuration.
 
 NPM package: [@apeframework/eslint](https://www.npmjs.com/package/@apeframework/eslint).
 
-GitHub repository: [MattSyms/apeframework](https://github.com/MattSyms/apeframework).
+GitHub repository: [MattSyms/ape-framework](https://github.com/MattSyms/ape-framework).
 
 ## Installation
 

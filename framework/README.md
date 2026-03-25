@@ -4,7 +4,7 @@
 
 NPM package: [apeframework](https://www.npmjs.com/package/apeframework).
 
-GitHub repository: [MattSyms/apeframework](https://github.com/MattSyms/apeframework).
+GitHub repository: [MattSyms/ape-framework](https://github.com/MattSyms/ape-framework).
 
 ## Installation
 

@@ -1,6 +1,6 @@
 # Ape Framework Development Stack
 
-Development stack for [Ape Framework](https://github.com/MattSyms/apeframework) using [Docker Compose](https://docs.docker.com/compose).
+Development stack for [Ape Framework](https://github.com/MattSyms/ape-framework) using [Docker Compose](https://docs.docker.com/compose).
 
 | Service | Docker URL  | Local URL                               |
 | ------- | ----------- | --------------------------------------- |

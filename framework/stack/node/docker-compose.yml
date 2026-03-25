@@ -2,6 +2,6 @@ services:
   node:
     image: node:22
     user: node
-    working_dir: /home/node/apeframework
+    working_dir: /home/node/ape-framework
     volumes:
-      - ../..:/home/node/apeframework
+      - ../..:/home/node/ape-framework

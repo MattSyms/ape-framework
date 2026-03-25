@@ -48,7 +48,7 @@ fs.writeJsonSync('build/package.json', {
   keywords: ['ape', 'framework', 'nodejs'],
   repository: {
     type: 'git',
-    url: 'git+https://github.com/MattSyms/apeframework.git',
+    url: 'git+https://github.com/MattSyms/ape-framework.git',
     directory: 'framework',
   },
   type: pkg.type,

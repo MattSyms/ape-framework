@@ -2,22 +2,19 @@ services:
   node:
     image: node:22
     user: node
-    working_dir: /home/node/apeframework
+    working_dir: /home/node/ape-framework
     volumes:
-      - ../..:/home/node/apeframework
+      - ../..:/home/node/ape-framework
     depends_on:
-      maildev:
-        condition: service_started
-      wait-for-it:
+      wait-for-services:
         condition: service_completed_successfully
 
   maildev:
     image: maildev/maildev
 
-  wait-for-it:
-    image: mattsyms/wait-for-it
-    entrypoint: >-
-      timeout 30 bash -c '
-        w -t 0 maildev:1025 &&
-        w -t 0 maildev:1080
-      '
+  wait-for-services:
+    image: mattsyms/wait-for
+    command: maildev:1025 maildev:1080 -t 30
+    depends_on:
+      maildev:
+        condition: service_started
