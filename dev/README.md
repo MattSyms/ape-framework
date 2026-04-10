@@ -21,3 +21,7 @@ Get a Node.js container shell:
 ```
 docker compose exec node bash
 ```
+
+## TODO
+
+- Remove MinIO
