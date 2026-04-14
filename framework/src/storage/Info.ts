@@ -1,8 +1,12 @@
+import type { Metadata } from './Metadata.js'
+
 interface Info {
   key: string,
+  contentType?: string,
   size: number,
   lastModified: Date,
-  contentType?: string,
+  eTag?: string,
+  metadata?: Metadata,
 }
 
 export {

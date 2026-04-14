@@ -14,27 +14,27 @@ describe('getting attachments', () => {
       getAttachments([
         {
           fileName: 'foo.txt',
-          contentType: 'text/plain',
           content: 'Foo',
+          contentType: 'text/plain',
         },
         {
           fileName: 'bar.txt',
-          contentType: 'text/plain',
           content: 'Bar',
+          contentType: 'text/plain',
         },
       ]),
     ).toStrictEqual([
       {
         filename: 'foo.txt',
         cid: 'foo.txt',
-        contentType: 'text/plain',
         content: 'Foo',
+        contentType: 'text/plain',
       },
       {
         filename: 'bar.txt',
         cid: 'bar.txt',
-        contentType: 'text/plain',
         content: 'Bar',
+        contentType: 'text/plain',
       },
     ])
   })

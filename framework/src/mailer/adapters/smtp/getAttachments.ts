@@ -4,8 +4,8 @@ import type { Readable } from 'node:stream'
 interface NodemailerAttachment {
   filename: string,
   cid: string,
-  contentType: string | undefined,
-  content: Buffer | Readable | string,
+  content: Readable | Buffer | string,
+  contentType?: string,
 }
 
 const getAttachments = (attachments?: Attachment[]): NodemailerAttachment[] => {
@@ -15,8 +15,8 @@ const getAttachments = (attachments?: Attachment[]): NodemailerAttachment[] => {
         return {
           filename: attachment.fileName,
           cid: attachment.fileName,
-          contentType: attachment.contentType,
           content: attachment.content,
+          contentType: attachment.contentType,
         }
       })
     : []

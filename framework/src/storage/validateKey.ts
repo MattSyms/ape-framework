@@ -16,17 +16,6 @@ const validateKey = (key: string, isPrefix = false): void => {
     )
   }
 
-  const segments = key.split('/')
-
-  for (const segment of segments) {
-    if (segment.length > MAX_SEGMENT_LENGTH) {
-      throw new KeyError(
-        key,
-        `key segment exceeds ${MAX_SEGMENT_LENGTH} characters`,
-      )
-    }
-  }
-
   if (key.startsWith('/')) {
     throw new KeyError(key, 'key starts with "/"')
   }
@@ -37,10 +26,6 @@ const validateKey = (key: string, isPrefix = false): void => {
 
   if (key.includes('//')) {
     throw new KeyError(key, 'key contains "//"')
-  }
-
-  if (key.includes('..')) {
-    throw new KeyError(key, 'key contains ".."')
   }
 
   if (key.includes('\\')) {
@@ -56,6 +41,21 @@ const validateKey = (key: string, isPrefix = false): void => {
 
     if (code <= 31 || code === 127) {
       throw new KeyError(key, 'key contains a control character')
+    }
+  }
+
+  const segments = key.split('/')
+
+  for (const segment of segments) {
+    if (segment.length > MAX_SEGMENT_LENGTH) {
+      throw new KeyError(
+        key,
+        `key segment exceeds ${MAX_SEGMENT_LENGTH} characters`,
+      )
+    }
+
+    if (segment.startsWith('.')) {
+      throw new KeyError(key, 'key segment starts with "."')
     }
   }
 }

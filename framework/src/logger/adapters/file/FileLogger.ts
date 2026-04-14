@@ -25,7 +25,7 @@ class FileLogger extends Logger {
       level: params.level ?? Level.INFO,
       messageKey: 'message',
       formatters: {
-        level(label, number) {
+        level: (label, number) => {
           return {
             level: label,
             severity: number,

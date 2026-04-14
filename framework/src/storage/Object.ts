@@ -1,9 +1,9 @@
 import type { Info } from './Info.js'
-import type { Stream } from './Stream.js'
+import type { Readable } from 'node:stream'
 
 interface Object {
   info: Info,
-  stream: Stream,
+  content: Readable,
 }
 
 export {
