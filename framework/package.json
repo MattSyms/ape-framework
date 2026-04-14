@@ -1,5 +1,5 @@
 {
-  "name": "apeframework-framework",
+  "name": "ape-framework-framework",
   "private": true,
   "scripts": {
     "update": "ncu",
@@ -34,6 +34,7 @@
     "ioredis": "^5.10",
     "jose": "^6.1",
     "mariadb": "^3.5",
+    "minio": "^8.0",
     "mysql2": "^3.18",
     "nodemailer": "^8.0",
     "openapi-types": "^12.1",

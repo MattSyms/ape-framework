@@ -1,5 +1,5 @@
 {
-  "name": "apeframework-eslint",
+  "name": "ape-framework-eslint",
   "private": true,
   "scripts": {
     "update": "ncu",
