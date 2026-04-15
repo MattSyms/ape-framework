@@ -162,10 +162,8 @@ class MinioStorage extends Storage {
     const metadata: Metadata = {}
 
     for (const [key, value] of Object.entries(metaData)) {
-      const lower = key.toLowerCase()
-
-      if (!EXCLUDED_METADATA_KEYS.has(lower)) {
-        metadata[lower] = value
+      if (!EXCLUDED_METADATA_KEYS.has(key)) {
+        metadata[key] = value
       }
     }
 

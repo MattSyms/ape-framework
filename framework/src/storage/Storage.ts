@@ -1,4 +1,5 @@
 import { ConflictError } from './errors/ConflictError.js'
+import { normalizeMetadata } from './normalizeMetadata.js'
 import { validateKey } from './validateKey.js'
 import type { Info } from './Info.js'
 import type { Metadata } from './Metadata.js'
@@ -39,7 +40,7 @@ abstract class Storage {
     return this._setObject({
       ...params,
       contentType: params.contentType ?? DEFAULT_CONTENT_TYPE,
-      metadata: this.normalizeMetadata(params.metadata),
+      metadata: normalizeMetadata(params.metadata),
     })
   }
 
@@ -77,20 +78,6 @@ abstract class Storage {
     }
   }
 
-  private normalizeMetadata(metadata?: Metadata): Metadata {
-    if (!metadata) {
-      return {}
-    }
-
-    const normalized: Metadata = {}
-
-    for (const [key, value] of globalThis.Object.entries(metadata)) {
-      normalized[key.toLowerCase()] = value
-    }
-
-    return normalized
-  }
-
   public abstract close(): Promise<void>
 
   protected abstract _getObject(key: string): Promise<Object | undefined>
@@ -102,8 +89,8 @@ abstract class Storage {
   protected abstract _setObject(params: {
     key: string,
     content: Readable | Buffer | Uint8Array,
-    contentType?: string,
-    metadata?: Metadata,
+    contentType: string,
+    metadata: Metadata,
   }): Promise<void>
 
   protected abstract _deleteObject(key: string): Promise<void>

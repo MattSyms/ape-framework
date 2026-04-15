@@ -65,8 +65,8 @@ class FsStorage extends Storage {
   protected async _setObject(params: {
     key: string,
     content: Readable | Buffer | Uint8Array,
-    contentType?: string,
-    metadata?: Metadata,
+    contentType: string,
+    metadata: Metadata,
   }): Promise<void> {
     const contentFilePath = join(this.root, params.key)
 
@@ -104,13 +104,13 @@ class FsStorage extends Storage {
       size,
       lastModified: new Date(),
       eTag: hash.digest('hex'),
-      metadata: params.metadata ?? {},
+      metadata: params.metadata,
     })
   }
 
   protected async _deleteObject(key: string): Promise<void> {
-    await fs.remove(join(this.root, key))
     await fs.remove(this.infoPath(key))
+    await fs.remove(join(this.root, key))
     await this.removeEmptyDirectories(key)
   }
 
@@ -173,11 +173,13 @@ class FsStorage extends Storage {
   }
 
   private async* getKeysByPrefix(prefix: string): AsyncGenerator<string> {
+    const infoRoot = join(this.root, INFO_DIRECTORY)
+
     const lastSlashIndex = prefix.lastIndexOf('/')
 
     const parentDir = lastSlashIndex >= 0
-      ? join(this.root, prefix.substring(0, lastSlashIndex))
-      : this.root
+      ? join(infoRoot, prefix.substring(0, lastSlashIndex))
+      : infoRoot
 
     try {
       if (!(await fs.stat(parentDir)).isDirectory()) {
@@ -195,15 +197,17 @@ class FsStorage extends Storage {
   }
 
   private async* walkDirectory(dir: string): AsyncGenerator<string> {
+    const infoRoot = join(this.root, INFO_DIRECTORY)
+
     const entries = await fs.readdir(dir, { withFileTypes: true })
 
     for (const entry of entries) {
-      if (!entry.name.startsWith('.')) {
-        if (entry.isDirectory()) {
-          yield* this.walkDirectory(join(dir, entry.name))
-        } else if (entry.isFile()) {
-          yield relative(this.root, join(dir, entry.name))
-        }
+      if (entry.isDirectory()) {
+        yield* this.walkDirectory(join(dir, entry.name))
+      } else if (entry.isFile()) {
+        const path = join(dir, entry.name)
+
+        yield relative(infoRoot, path).slice(0, -INFO_EXTENSION.length)
       }
     }
   }
