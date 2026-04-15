@@ -20,8 +20,8 @@ class Migrator {
   }) {
     const glob = `${params.directory}/*.${params.extension}`
 
-    const resolve: Resolver<QueryInterface> = ({ name: filename, context }) => {
-      const name = basename(filename, extname(filename))
+    const resolve: Resolver<QueryInterface> = ({ name: fileName, context }) => {
+      const name = basename(fileName, extname(fileName))
 
       const up: MigrationFn<QueryInterface> = async ({ path }) => {
         const migration = await params.load(String(path))
