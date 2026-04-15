@@ -1,3 +1,5 @@
+import http from 'node:http'
+import https from 'node:https'
 import { Readable } from 'node:stream'
 import { Client } from 'minio'
 import { Storage } from '../../Storage.js'
@@ -12,6 +14,8 @@ const EXCLUDED_METADATA_KEYS = new Set([
 
 class MinioStorage extends Storage {
   private readonly client: Client
+
+  private readonly agent: http.Agent
 
   private readonly bucket: string
 
@@ -29,6 +33,10 @@ class MinioStorage extends Storage {
   }) {
     super()
 
+    this.agent = params.tls
+      ? new https.Agent({ keepAlive: true })
+      : new http.Agent({ keepAlive: true })
+
     this.client = new Client({
       endPoint: params.host,
       port: params.port ?? 9000,
@@ -36,6 +44,7 @@ class MinioStorage extends Storage {
       accessKey: params.accessKey,
       secretKey: params.secretKey,
       region: params.region,
+      transportAgent: this.agent,
     })
 
     this.bucket = params.bucket
@@ -156,14 +165,16 @@ class MinioStorage extends Storage {
     }
   }
 
-  public async close(): Promise<void> { }
+  public async close(): Promise<void> {
+    this.agent.destroy()
+  }
 
   private getMetadata(
     metaData: Record<string, string>,
   ): Metadata {
     const metadata: Metadata = {}
 
-    for (const [key, value] of globalThis.Object.entries(metaData)) {
+    for (const [key, value] of Object.entries(metaData)) {
       const lower = key.toLowerCase()
 
       if (!EXCLUDED_METADATA_KEYS.has(lower)) {

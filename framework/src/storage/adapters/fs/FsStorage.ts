@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { createReadStream, createWriteStream } from 'node:fs'
-import { join, relative, resolve } from 'node:path'
+import { dirname, join, relative, resolve } from 'node:path'
 import { Readable, Transform } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 import fs from 'fs-extra'
@@ -10,11 +10,11 @@ import type { Info } from '../../Info.js'
 import type { Metadata } from '../../Metadata.js'
 import type { Object } from '../../Object.js'
 
-const INFO_FILE_NAME = '.info.json'
+const INFO_DIRECTORY = '.info'
 
-const CONTENT_FILE_NAME = '.content'
+const INFO_EXTENSION = '.json'
 
-const TMP_SUFFIX = '.tmp'
+const TMP_EXTENSION = '.tmp'
 
 class FsStorage extends Storage {
   private readonly root: string
@@ -31,6 +31,7 @@ class FsStorage extends Storage {
     this.concurrency = params.concurrency ?? 100
 
     fs.ensureDirSync(this.root)
+    fs.ensureDirSync(join(this.root, INFO_DIRECTORY))
   }
 
   public async getObject(key: string): Promise<Object | undefined> {
@@ -44,7 +45,7 @@ class FsStorage extends Storage {
 
     return {
       info,
-      content: createReadStream(join(this.root, key, CONTENT_FILE_NAME)),
+      content: createReadStream(join(this.root, key)),
     }
   }
 
@@ -74,11 +75,11 @@ class FsStorage extends Storage {
   }): Promise<void> {
     validateKey(params.key)
 
-    const contentFilePath = join(this.root, params.key, CONTENT_FILE_NAME)
+    const contentFilePath = join(this.root, params.key)
 
-    const tmpFilePath = `${contentFilePath}${TMP_SUFFIX}`
+    const tmpFilePath = `${contentFilePath}${TMP_EXTENSION}`
 
-    await fs.ensureDir(join(this.root, params.key))
+    await fs.ensureDir(dirname(contentFilePath))
 
     const stream = params.content instanceof Uint8Array
       ? Readable.from(Buffer.from(params.content))
@@ -119,6 +120,7 @@ class FsStorage extends Storage {
     validateKey(key)
 
     await fs.remove(join(this.root, key))
+    await fs.remove(this.infoPath(key))
     await this.removeEmptyDirectories(key)
   }
 
@@ -143,9 +145,13 @@ class FsStorage extends Storage {
 
   public async close(): Promise<void> { }
 
+  private infoPath(key: string): string {
+    return join(this.root, INFO_DIRECTORY, `${key}${INFO_EXTENSION}`)
+  }
+
   private async readInfo(key: string): Promise<Info | undefined> {
     try {
-      const info: Info = await fs.readJson(join(this.root, key, INFO_FILE_NAME))
+      const info: Info = await fs.readJson(this.infoPath(key))
 
       return {
         key: info.key,
@@ -161,9 +167,11 @@ class FsStorage extends Storage {
   }
 
   private async writeInfo(info: Info): Promise<void> {
-    const infoFilePath = join(this.root, info.key, INFO_FILE_NAME)
+    const infoFilePath = this.infoPath(info.key)
 
-    const tmpFilePath = `${infoFilePath}${TMP_SUFFIX}`
+    const tmpFilePath = `${infoFilePath}${TMP_EXTENSION}`
+
+    await fs.ensureDir(dirname(infoFilePath))
 
     try {
       await fs.writeJson(tmpFilePath, info)
@@ -205,14 +213,10 @@ class FsStorage extends Storage {
     const entries = await fs.readdir(dir, { withFileTypes: true })
 
     for (const entry of entries) {
-      const entryPath = join(dir, entry.name)
-
-      if (entry.name.startsWith('.')) {
-        if (entry.name === INFO_FILE_NAME) {
-          yield relative(this.root, dir)
-        }
-      } else if (entry.isDirectory()) {
-        yield* this.walkDirectory(entryPath)
+      if (entry.name !== INFO_DIRECTORY && entry.isDirectory()) {
+        yield* this.walkDirectory(join(dir, entry.name))
+      } else if (entry.isFile()) {
+        yield relative(this.root, join(dir, entry.name))
       }
     }
   }
@@ -221,19 +225,28 @@ class FsStorage extends Storage {
     const segments = key.split('/')
 
     for (let i = segments.length - 1; i >= 1; i -= 1) {
-      const dir = join(this.root, ...segments.slice(0, i))
+      const path = segments.slice(0, i)
+      const contentDir = join(this.root, ...path)
+      const infoDir = join(this.root, INFO_DIRECTORY, ...path)
 
       try {
-        const entries = await fs.readdir(dir)
-
-        if (entries.length === 0) {
-          await fs.remove(dir)
-        } else {
-          break
-        }
+        await this.removeIfEmpty(contentDir)
+        await this.removeIfEmpty(infoDir)
       } catch {
         break
       }
+    }
+  }
+
+  private async removeIfEmpty(dir: string): Promise<void> {
+    if (!await fs.pathExists(dir)) {
+      return
+    }
+
+    const entries = await fs.readdir(dir)
+
+    if (entries.length === 0) {
+      await fs.remove(dir)
     }
   }
 
