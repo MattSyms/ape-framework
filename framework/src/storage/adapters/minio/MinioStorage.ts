@@ -6,6 +6,7 @@ import { Storage } from '../../Storage.js'
 import type { Info } from '../../Info.js'
 import type { Metadata } from '../../Metadata.js'
 import type { Object } from '../../Object.js'
+import type { Stat } from '../../Stat.js'
 
 const EXCLUDED_METADATA_KEYS = new Set([
   'content-type',
@@ -75,10 +76,10 @@ class MinioStorage extends Storage {
 
       return {
         key,
-        contentType: stat.metaData['content-type'],
         size: stat.size,
         lastModified: stat.lastModified,
         eTag: stat.etag,
+        contentType: stat.metaData['content-type'],
         metadata: this.getMetadata(stat.metaData),
       }
     } catch (error: any) {
@@ -90,15 +91,16 @@ class MinioStorage extends Storage {
     }
   }
 
-  protected async* _getObjects(prefix: string): AsyncGenerator<Info> {
+  protected async* _getObjects(prefix: string): AsyncGenerator<Stat> {
     const stream = this.client.listObjects(this.bucket, prefix, true)
 
     for await (const item of stream) {
       if (item.name) {
-        const info = await this._getObjectInfo(item.name)
-
-        if (info) {
-          yield info
+        yield {
+          key: item.name,
+          size: item.size,
+          lastModified: item.lastModified,
+          eTag: item.etag,
         }
       }
     }
@@ -107,16 +109,14 @@ class MinioStorage extends Storage {
   protected async _setObject(params: {
     key: string,
     content: Readable | Buffer | Uint8Array,
-    contentType?: string,
-    metadata?: Metadata,
+    contentType: string,
+    metadata: Metadata,
   }): Promise<void> {
     const headers: Record<string, string> = {
       ...params.metadata,
     }
 
-    if (params.contentType) {
-      headers['Content-Type'] = params.contentType
-    }
+    headers['Content-Type'] = params.contentType
 
     const stream = params.content instanceof Uint8Array
       ? Readable.from(Buffer.from(params.content))

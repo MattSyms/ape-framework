@@ -8,6 +8,7 @@ import { Storage } from '../../Storage.js'
 import type { Info } from '../../Info.js'
 import type { Metadata } from '../../Metadata.js'
 import type { Object } from '../../Object.js'
+import type { Stat } from '../../Stat.js'
 
 const INFO_DIRECTORY = '.info'
 
@@ -52,12 +53,17 @@ class FsStorage extends Storage {
     return this.readInfo(key)
   }
 
-  protected async* _getObjects(prefix: string): AsyncGenerator<Info> {
+  protected async* _getObjects(prefix: string): AsyncGenerator<Stat> {
     for await (const key of this.getKeysByPrefix(prefix)) {
       const info = await this.readInfo(key)
 
       if (info) {
-        yield info
+        yield {
+          key: info.key,
+          size: info.size,
+          lastModified: info.lastModified,
+          eTag: info.eTag,
+        }
       }
     }
   }
@@ -100,10 +106,10 @@ class FsStorage extends Storage {
 
     await this.writeInfo({
       key: params.key,
-      contentType: params.contentType,
       size,
       lastModified: new Date(),
       eTag: hash.digest('hex'),
+      contentType: params.contentType,
       metadata: params.metadata,
     })
   }
@@ -145,10 +151,10 @@ class FsStorage extends Storage {
 
       return {
         key: info.key,
-        contentType: info.contentType,
         size: info.size,
         lastModified: new Date(info.lastModified),
         eTag: info.eTag,
+        contentType: info.contentType,
         metadata: info.metadata,
       }
     } catch {
@@ -221,23 +227,11 @@ class FsStorage extends Storage {
       const infoDir = join(this.root, INFO_DIRECTORY, ...path)
 
       try {
-        await this.removeIfEmpty(contentDir)
-        await this.removeIfEmpty(infoDir)
+        await fs.rmdir(contentDir)
+        await fs.rmdir(infoDir)
       } catch {
         break
       }
-    }
-  }
-
-  private async removeIfEmpty(dir: string): Promise<void> {
-    if (!await fs.pathExists(dir)) {
-      return
-    }
-
-    const entries = await fs.readdir(dir)
-
-    if (entries.length === 0) {
-      await fs.remove(dir)
     }
   }
 }

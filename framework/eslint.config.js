@@ -17,7 +17,10 @@ const config = [
     ...typescript(),
   },
   {
-    rules: {},
+    rules: {
+      'import/no-deprecated': 'off',
+      'no-underscore-dangle': 'off',
+    },
   },
 ]
 

@@ -1,11 +1,8 @@
 import type { Metadata } from './Metadata.js'
+import type { Stat } from './Stat.js'
 
-interface Info {
-  key: string,
+interface Info extends Stat {
   contentType: string,
-  size: number,
-  lastModified: Date,
-  eTag: string,
   metadata: Metadata,
 }
 

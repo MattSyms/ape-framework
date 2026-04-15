@@ -4,6 +4,7 @@ import { validateKey } from './validateKey.js'
 import type { Info } from './Info.js'
 import type { Metadata } from './Metadata.js'
 import type { Object } from './Object.js'
+import type { Stat } from './Stat.js'
 import type { Readable } from 'node:stream'
 
 const DEFAULT_CONTENT_TYPE = 'application/octet-stream'
@@ -21,7 +22,7 @@ abstract class Storage {
     return this._getObjectInfo(key)
   }
 
-  public async* getObjects(prefix: string): AsyncGenerator<Info> {
+  public async* getObjects(prefix: string): AsyncGenerator<Stat> {
     validateKey(prefix, true)
 
     yield* this._getObjects(prefix)
@@ -84,7 +85,7 @@ abstract class Storage {
 
   protected abstract _getObjectInfo(key: string): Promise<Info | undefined>
 
-  protected abstract _getObjects(prefix: string): AsyncGenerator<Info>
+  protected abstract _getObjects(prefix: string): AsyncGenerator<Stat>
 
   protected abstract _setObject(params: {
     key: string,
