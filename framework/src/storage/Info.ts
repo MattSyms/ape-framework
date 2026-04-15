@@ -5,8 +5,8 @@ interface Info {
   contentType?: string,
   size: number,
   lastModified: Date,
-  eTag?: string,
-  metadata?: Metadata,
+  eTag: string,
+  metadata: Metadata,
 }
 
 export {

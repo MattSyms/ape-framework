@@ -10,6 +10,12 @@ import type { Info } from '../../Info.js'
 import type { Metadata } from '../../Metadata.js'
 import type { Object } from '../../Object.js'
 
+const INFO_FILE_NAME = '.info.json'
+
+const CONTENT_FILE_NAME = '.content'
+
+const TMP_SUFFIX = '.tmp'
+
 class FsStorage extends Storage {
   private readonly root: string
 
@@ -22,7 +28,7 @@ class FsStorage extends Storage {
     super()
 
     this.root = resolve(params.root)
-    this.concurrency = params.concurrency ?? 10
+    this.concurrency = params.concurrency ?? 100
 
     fs.ensureDirSync(this.root)
   }
@@ -38,7 +44,7 @@ class FsStorage extends Storage {
 
     return {
       info,
-      content: createReadStream(join(this.root, key, '.content')),
+      content: createReadStream(join(this.root, key, CONTENT_FILE_NAME)),
     }
   }
 
@@ -68,8 +74,9 @@ class FsStorage extends Storage {
   }): Promise<void> {
     validateKey(params.key)
 
-    const contentFilePath = join(this.root, params.key, '.content')
-    const tmpFilePath = `${contentFilePath}.tmp`
+    const contentFilePath = join(this.root, params.key, CONTENT_FILE_NAME)
+
+    const tmpFilePath = `${contentFilePath}${TMP_SUFFIX}`
 
     await fs.ensureDir(join(this.root, params.key))
 
@@ -100,11 +107,11 @@ class FsStorage extends Storage {
 
     await this.writeInfo({
       key: params.key,
-      contentType: params.contentType,
+      contentType: params.contentType ?? 'binary/octet-stream',
       size,
       lastModified: new Date(),
       eTag: hash.digest('hex'),
-      metadata: params.metadata,
+      metadata: this.normalizeMetadata(params.metadata),
     })
   }
 
@@ -112,7 +119,7 @@ class FsStorage extends Storage {
     validateKey(key)
 
     await fs.remove(join(this.root, key))
-    await this.pruneEmptyDirs(key)
+    await this.removeEmptyDirectories(key)
   }
 
   public async deleteObjects(prefix: string): Promise<void> {
@@ -134,11 +141,11 @@ class FsStorage extends Storage {
     }
   }
 
-  public async close(): Promise<void> {}
+  public async close(): Promise<void> { }
 
   private async readInfo(key: string): Promise<Info | undefined> {
     try {
-      const info: Info = await fs.readJson(join(this.root, key, '.info.json'))
+      const info: Info = await fs.readJson(join(this.root, key, INFO_FILE_NAME))
 
       return {
         key: info.key,
@@ -154,8 +161,9 @@ class FsStorage extends Storage {
   }
 
   private async writeInfo(info: Info): Promise<void> {
-    const infoFilePath = join(this.root, info.key, '.info.json')
-    const tmpFilePath = `${infoFilePath}.tmp`
+    const infoFilePath = join(this.root, info.key, INFO_FILE_NAME)
+
+    const tmpFilePath = `${infoFilePath}${TMP_SUFFIX}`
 
     try {
       await fs.writeJson(tmpFilePath, info)
@@ -178,25 +186,9 @@ class FsStorage extends Storage {
       return
     }
 
-    for await (const key of this.walkDir(parentDir)) {
+    for await (const key of this.walkDirectory(parentDir)) {
       if (key.startsWith(prefix)) {
         yield key
-      }
-    }
-  }
-
-  private async* walkDir(dir: string): AsyncGenerator<string> {
-    const entries = await fs.readdir(dir, { withFileTypes: true })
-
-    for (const entry of entries) {
-      const entryPath = join(dir, entry.name)
-
-      if (entry.name.startsWith('.')) {
-        if (entry.name === '.info.json') {
-          yield relative(this.root, dir)
-        }
-      } else if (entry.isDirectory()) {
-        yield* this.walkDir(entryPath)
       }
     }
   }
@@ -209,7 +201,23 @@ class FsStorage extends Storage {
     }
   }
 
-  private async pruneEmptyDirs(key: string): Promise<void> {
+  private async* walkDirectory(dir: string): AsyncGenerator<string> {
+    const entries = await fs.readdir(dir, { withFileTypes: true })
+
+    for (const entry of entries) {
+      const entryPath = join(dir, entry.name)
+
+      if (entry.name.startsWith('.')) {
+        if (entry.name === INFO_FILE_NAME) {
+          yield relative(this.root, dir)
+        }
+      } else if (entry.isDirectory()) {
+        yield* this.walkDirectory(entryPath)
+      }
+    }
+  }
+
+  private async removeEmptyDirectories(key: string): Promise<void> {
     const segments = key.split('/')
 
     for (let i = segments.length - 1; i >= 1; i -= 1) {
@@ -227,6 +235,20 @@ class FsStorage extends Storage {
         break
       }
     }
+  }
+
+  private normalizeMetadata(metadata?: Metadata): Metadata {
+    if (!metadata) {
+      return {}
+    }
+
+    const normalized: Metadata = {}
+
+    for (const [key, value] of Object.entries(metadata)) {
+      normalized[key.toLowerCase()] = value
+    }
+
+    return normalized
   }
 }
 
