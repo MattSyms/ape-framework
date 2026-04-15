@@ -3,7 +3,6 @@ import https from 'node:https'
 import { Readable } from 'node:stream'
 import { Client } from 'minio'
 import { Storage } from '../../Storage.js'
-import { validateKey } from '../../validateKey.js'
 import type { Info } from '../../Info.js'
 import type { Metadata } from '../../Metadata.js'
 import type { Object } from '../../Object.js'
@@ -51,10 +50,12 @@ class MinioStorage extends Storage {
     this.concurrency = params.concurrency ?? 100
   }
 
-  public async getObject(key: string): Promise<Object | undefined> {
-    validateKey(key)
+  public async close(): Promise<void> {
+    this.agent.destroy()
+  }
 
-    const info = await this.getObjectInfo(key)
+  protected async _getObject(key: string): Promise<Object | undefined> {
+    const info = await this._getObjectInfo(key)
 
     if (!info) {
       return undefined
@@ -68,9 +69,7 @@ class MinioStorage extends Storage {
     }
   }
 
-  public async getObjectInfo(key: string): Promise<Info | undefined> {
-    validateKey(key)
-
+  protected async _getObjectInfo(key: string): Promise<Info | undefined> {
     try {
       const stat = await this.client.statObject(this.bucket, key)
 
@@ -91,14 +90,12 @@ class MinioStorage extends Storage {
     }
   }
 
-  public async* getObjects(prefix: string): AsyncGenerator<Info> {
-    validateKey(prefix, true)
-
+  protected async* _getObjects(prefix: string): AsyncGenerator<Info> {
     const stream = this.client.listObjects(this.bucket, prefix, true)
 
     for await (const item of stream) {
       if (item.name) {
-        const info = await this.getObjectInfo(item.name)
+        const info = await this._getObjectInfo(item.name)
 
         if (info) {
           yield info
@@ -107,14 +104,12 @@ class MinioStorage extends Storage {
     }
   }
 
-  public async setObject(params: {
+  protected async _setObject(params: {
     key: string,
     content: Readable | Buffer | Uint8Array,
     contentType?: string,
     metadata?: Metadata,
   }): Promise<void> {
-    validateKey(params.key)
-
     const headers: Record<string, string> = {
       ...params.metadata,
     }
@@ -136,15 +131,11 @@ class MinioStorage extends Storage {
     )
   }
 
-  public async deleteObject(key: string): Promise<void> {
-    validateKey(key)
-
+  protected async _deleteObject(key: string): Promise<void> {
     await this.client.removeObject(this.bucket, key)
   }
 
-  public async deleteObjects(prefix: string): Promise<void> {
-    validateKey(prefix, true)
-
+  protected async _deleteObjects(prefix: string): Promise<void> {
     const stream = this.client.listObjects(this.bucket, prefix, true)
 
     const batch: string[] = []
@@ -163,10 +154,6 @@ class MinioStorage extends Storage {
     if (batch.length > 0) {
       await this.client.removeObjects(this.bucket, batch)
     }
-  }
-
-  public async close(): Promise<void> {
-    this.agent.destroy()
   }
 
   private getMetadata(

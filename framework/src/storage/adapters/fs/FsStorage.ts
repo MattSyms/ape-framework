@@ -1,11 +1,10 @@
 import { createHash } from 'node:crypto'
 import { createReadStream, createWriteStream } from 'node:fs'
-import { dirname, join, relative, resolve } from 'node:path'
+import { basename, dirname, join, relative, resolve } from 'node:path'
 import { Readable, Transform } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 import fs from 'fs-extra'
 import { Storage } from '../../Storage.js'
-import { validateKey } from '../../validateKey.js'
 import type { Info } from '../../Info.js'
 import type { Metadata } from '../../Metadata.js'
 import type { Object } from '../../Object.js'
@@ -34,9 +33,9 @@ class FsStorage extends Storage {
     fs.ensureDirSync(join(this.root, INFO_DIRECTORY))
   }
 
-  public async getObject(key: string): Promise<Object | undefined> {
-    validateKey(key)
+  public async close(): Promise<void> { }
 
+  protected async _getObject(key: string): Promise<Object | undefined> {
     const info = await this.readInfo(key)
 
     if (!info) {
@@ -49,15 +48,11 @@ class FsStorage extends Storage {
     }
   }
 
-  public async getObjectInfo(key: string): Promise<Info | undefined> {
-    validateKey(key)
-
+  protected async _getObjectInfo(key: string): Promise<Info | undefined> {
     return this.readInfo(key)
   }
 
-  public async* getObjects(prefix: string): AsyncGenerator<Info> {
-    validateKey(prefix, true)
-
+  protected async* _getObjects(prefix: string): AsyncGenerator<Info> {
     for await (const key of this.getKeysByPrefix(prefix)) {
       const info = await this.readInfo(key)
 
@@ -67,17 +62,15 @@ class FsStorage extends Storage {
     }
   }
 
-  public async setObject(params: {
+  protected async _setObject(params: {
     key: string,
     content: Readable | Buffer | Uint8Array,
     contentType?: string,
     metadata?: Metadata,
   }): Promise<void> {
-    validateKey(params.key)
-
     const contentFilePath = join(this.root, params.key)
 
-    const tmpFilePath = `${contentFilePath}${TMP_EXTENSION}`
+    const tmpFilePath = this.tmpPath(contentFilePath)
 
     await fs.ensureDir(dirname(contentFilePath))
 
@@ -99,38 +92,33 @@ class FsStorage extends Storage {
 
     try {
       await pipeline(stream, meter, createWriteStream(tmpFilePath))
+      await fs.rename(tmpFilePath, contentFilePath)
     } catch (error) {
       await fs.remove(tmpFilePath)
       throw error
     }
 
-    await fs.rename(tmpFilePath, contentFilePath)
-
     await this.writeInfo({
       key: params.key,
-      contentType: params.contentType ?? 'binary/octet-stream',
+      contentType: params.contentType,
       size,
       lastModified: new Date(),
       eTag: hash.digest('hex'),
-      metadata: this.normalizeMetadata(params.metadata),
+      metadata: params.metadata ?? {},
     })
   }
 
-  public async deleteObject(key: string): Promise<void> {
-    validateKey(key)
-
+  protected async _deleteObject(key: string): Promise<void> {
     await fs.remove(join(this.root, key))
     await fs.remove(this.infoPath(key))
     await this.removeEmptyDirectories(key)
   }
 
-  public async deleteObjects(prefix: string): Promise<void> {
-    validateKey(prefix, true)
-
+  protected async _deleteObjects(prefix: string): Promise<void> {
     const batch: Promise<void>[] = []
 
     for await (const key of this.getKeysByPrefix(prefix)) {
-      batch.push(this.deleteObject(key))
+      batch.push(this._deleteObject(key))
 
       if (batch.length >= this.concurrency) {
         await Promise.all(batch)
@@ -143,10 +131,12 @@ class FsStorage extends Storage {
     }
   }
 
-  public async close(): Promise<void> { }
-
   private infoPath(key: string): string {
     return join(this.root, INFO_DIRECTORY, `${key}${INFO_EXTENSION}`)
+  }
+
+  private tmpPath(filePath: string): string {
+    return join(dirname(filePath), `.${basename(filePath)}${TMP_EXTENSION}`)
   }
 
   private async readInfo(key: string): Promise<Info | undefined> {
@@ -169,18 +159,17 @@ class FsStorage extends Storage {
   private async writeInfo(info: Info): Promise<void> {
     const infoFilePath = this.infoPath(info.key)
 
-    const tmpFilePath = `${infoFilePath}${TMP_EXTENSION}`
+    const tmpFilePath = this.tmpPath(infoFilePath)
 
     await fs.ensureDir(dirname(infoFilePath))
 
     try {
       await fs.writeJson(tmpFilePath, info)
+      await fs.rename(tmpFilePath, infoFilePath)
     } catch (error) {
       await fs.remove(tmpFilePath)
       throw error
     }
-
-    await fs.rename(tmpFilePath, infoFilePath)
   }
 
   private async* getKeysByPrefix(prefix: string): AsyncGenerator<string> {
@@ -190,7 +179,11 @@ class FsStorage extends Storage {
       ? join(this.root, prefix.substring(0, lastSlashIndex))
       : this.root
 
-    if (!await this.isDirectory(parentDir)) {
+    try {
+      if (!(await fs.stat(parentDir)).isDirectory()) {
+        return
+      }
+    } catch {
       return
     }
 
@@ -201,22 +194,16 @@ class FsStorage extends Storage {
     }
   }
 
-  private async isDirectory(path: string): Promise<boolean> {
-    try {
-      return (await fs.stat(path)).isDirectory()
-    } catch {
-      return false
-    }
-  }
-
   private async* walkDirectory(dir: string): AsyncGenerator<string> {
     const entries = await fs.readdir(dir, { withFileTypes: true })
 
     for (const entry of entries) {
-      if (entry.name !== INFO_DIRECTORY && entry.isDirectory()) {
-        yield* this.walkDirectory(join(dir, entry.name))
-      } else if (entry.isFile()) {
-        yield relative(this.root, join(dir, entry.name))
+      if (!entry.name.startsWith('.')) {
+        if (entry.isDirectory()) {
+          yield* this.walkDirectory(join(dir, entry.name))
+        } else if (entry.isFile()) {
+          yield relative(this.root, join(dir, entry.name))
+        }
       }
     }
   }
@@ -248,20 +235,6 @@ class FsStorage extends Storage {
     if (entries.length === 0) {
       await fs.remove(dir)
     }
-  }
-
-  private normalizeMetadata(metadata?: Metadata): Metadata {
-    if (!metadata) {
-      return {}
-    }
-
-    const normalized: Metadata = {}
-
-    for (const [key, value] of Object.entries(metadata)) {
-      normalized[key.toLowerCase()] = value
-    }
-
-    return normalized
   }
 }
 
