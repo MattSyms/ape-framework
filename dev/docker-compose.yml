@@ -10,33 +10,12 @@ services:
       - ../framework:/home/node/framework
       - ../eslint:/home/node/eslint
 
-  minio:
-    image: minio/minio
-    command: server /data --console-address ':9001'
+  redis:
+    image: redis
     ports:
-      - ${MINIO_PORT:-9000}:9000
-      - ${MINIO_CONSOLE_PORT:-9001}:9001
+      - ${REDIS_PORT:-6379}:6379
     volumes:
-      - minio-data:/data
-    environment:
-      MINIO_ROOT_USER: root
-      MINIO_ROOT_PASSWORD: password
-
-  minio-ready:
-    image: mattsyms/wait-for
-    command: minio:9000 -t 30
-    depends_on:
-      minio:
-        condition: service_started
-
-  minio-init:
-    image: minio/mc
-    entrypoint: bash -c 'chmod +x /minio-init/init.sh && /minio-init/init.sh'
-    depends_on:
-      minio-ready:
-        condition: service_completed_successfully
-    volumes:
-      - ./minio-init:/minio-init
+      - redis-data:/data
 
 volumes:
-  minio-data:
+  redis-data:
