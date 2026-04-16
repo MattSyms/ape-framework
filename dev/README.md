@@ -24,4 +24,4 @@ docker compose exec node bash
 
 ## TODO
 
-- Remove MinIO
+- Remove Redis
