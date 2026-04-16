@@ -39,7 +39,11 @@ class SmtpMailer extends Mailer {
     })
   }
 
-  public async sendMail(mail: Mail): Promise<string> {
+  public async close(): Promise<void> {
+    this.transporter.close()
+  }
+
+  protected async _sendMail(mail: Mail): Promise<string> {
     const result = await this.transporter.sendMail({
       from: getAddress(mail.from),
       sender: getAddress(mail.sender),
@@ -62,10 +66,6 @@ class SmtpMailer extends Mailer {
     })
 
     return result.messageId.slice(1, -1)
-  }
-
-  public async close(): Promise<void> {
-    this.transporter.close()
   }
 }
 

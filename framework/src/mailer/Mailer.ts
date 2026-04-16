@@ -6,7 +6,7 @@ import { validateListUrl } from './validateListUrl.js'
 import type { Mail } from './Mail.js'
 
 abstract class Mailer {
-  public async send(mail: Mail): Promise<string> {
+  public async sendMail(mail: Mail): Promise<string> {
     validateAddressEmail(mail.from.email)
 
     if (mail.sender) {
@@ -56,12 +56,12 @@ abstract class Mailer {
       })
     }
 
-    return this.sendMail(mail)
+    return this._sendMail(mail)
   }
 
-  public abstract sendMail(mail: Mail): Promise<string>
-
   public abstract close(): Promise<void>
+
+  protected abstract _sendMail(mail: Mail): Promise<string>
 }
 
 export {
