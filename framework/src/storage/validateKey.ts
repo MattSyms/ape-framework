@@ -10,10 +10,19 @@ const validateKey = (key: string, isPrefix = false): void => {
   }
 
   if (key.length > MAX_KEY_LENGTH) {
-    throw new KeyError(
-      key,
-      `key exceeds ${MAX_KEY_LENGTH} characters`,
-    )
+    throw new KeyError(key, `key exceeds ${MAX_KEY_LENGTH} characters`)
+  }
+
+  if (key !== key.trim()) {
+    throw new KeyError(key, 'key contains a leading or trailing whitespace')
+  }
+
+  for (let i = 0; i < key.length; i += 1) {
+    const code = key.charCodeAt(i)
+
+    if (code <= 31 || code === 127) {
+      throw new KeyError(key, 'key contains a control character')
+    }
   }
 
   if (key.startsWith('/')) {
@@ -30,18 +39,6 @@ const validateKey = (key: string, isPrefix = false): void => {
 
   if (key.includes('\\')) {
     throw new KeyError(key, 'key contains "\\"')
-  }
-
-  if (key !== key.trim()) {
-    throw new KeyError(key, 'key contains a leading or trailing whitespace')
-  }
-
-  for (let i = 0; i < key.length; i += 1) {
-    const code = key.charCodeAt(i)
-
-    if (code <= 31 || code === 127) {
-      throw new KeyError(key, 'key contains a control character')
-    }
   }
 
   const segments = key.split('/')
