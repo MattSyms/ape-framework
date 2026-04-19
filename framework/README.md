@@ -57,3 +57,10 @@ Push tags:
 ```
 git push --tags
 ```
+
+## TODO
+
+- enhance redis cache connection options
+- review memory cache adapter
+- implement noop cache adapter
+- test cache adapters
