@@ -1,8 +1,8 @@
 import { validateKey } from './validateKey.js'
-import type { JsonValue } from './JsonValue.js'
+import type { Value } from './Value.js'
 
 abstract class Cache {
-  public async getEntry<T extends JsonValue>(
+  public async getEntry<T extends Value>(
     key: string,
   ): Promise<T | undefined> {
     validateKey(key)
@@ -12,7 +12,7 @@ abstract class Cache {
     return cached === undefined ? undefined : this.deserialize<T>(cached)
   }
 
-  public async setEntry<T extends JsonValue>(
+  public async setEntry<T extends Value>(
     key: string,
     value: T,
     ttl?: number,
@@ -28,13 +28,13 @@ abstract class Cache {
     return this._deleteEntry(key)
   }
 
-  public async hasEntry(key: string): Promise<boolean> {
+  public async hasKey(key: string): Promise<boolean> {
     validateKey(key)
 
     return this._hasKey(key)
   }
 
-  public async getEntries<T extends JsonValue>(
+  public async getEntries<T extends Value>(
     keys: string[],
   ): Promise<Map<string, T>> {
     keys.forEach(validateKey)
@@ -50,7 +50,7 @@ abstract class Cache {
     return result
   }
 
-  public async setEntries<T extends JsonValue>(
+  public async setEntries<T extends Value>(
     entries: Map<string, T>,
     ttl?: number,
   ): Promise<void> {
@@ -73,13 +73,13 @@ abstract class Cache {
     return this._deleteEntries(keys)
   }
 
-  public async hasEntries(keys: string[]): Promise<Set<string>> {
+  public async hasKeys(keys: string[]): Promise<Set<string>> {
     keys.forEach(validateKey)
 
     return this._hasKeys(keys)
   }
 
-  public async getOrSetEntry<T extends JsonValue>(
+  public async getOrSetEntry<T extends Value>(
     key: string,
     fn: () => Promise<T>,
     ttl?: number,
@@ -97,11 +97,11 @@ abstract class Cache {
     return value
   }
 
-  private serialize<T extends JsonValue>(value: T): string {
+  private serialize<T extends Value>(value: T): string {
     return JSON.stringify(value)
   }
 
-  private deserialize<T extends JsonValue>(value: string): T {
+  private deserialize<T extends Value>(value: string): T {
     return JSON.parse(value) as T
   }
 
