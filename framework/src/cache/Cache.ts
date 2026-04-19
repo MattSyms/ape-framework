@@ -1,7 +1,10 @@
 import { validateKey } from './validateKey.js'
+import type { JsonValue } from './JsonValue.js'
 
 abstract class Cache {
-  public async getEntry<T>(key: string): Promise<T | undefined> {
+  public async getEntry<T extends JsonValue>(
+    key: string,
+  ): Promise<T | undefined> {
     validateKey(key)
 
     const cached = await this._getEntry(key)
@@ -9,7 +12,11 @@ abstract class Cache {
     return cached === undefined ? undefined : this.deserialize<T>(cached)
   }
 
-  public async setEntry<T>(key: string, value: T, ttl?: number): Promise<void> {
+  public async setEntry<T extends JsonValue>(
+    key: string,
+    value: T,
+    ttl?: number,
+  ): Promise<void> {
     validateKey(key)
 
     return this._setEntry(key, this.serialize(value), ttl)
@@ -27,7 +34,9 @@ abstract class Cache {
     return this._hasKey(key)
   }
 
-  public async getEntries<T>(keys: string[]): Promise<Map<string, T>> {
+  public async getEntries<T extends JsonValue>(
+    keys: string[],
+  ): Promise<Map<string, T>> {
     keys.forEach(validateKey)
 
     const cached = await this._getEntries(keys)
@@ -41,7 +50,7 @@ abstract class Cache {
     return result
   }
 
-  public async setEntries<T>(
+  public async setEntries<T extends JsonValue>(
     entries: Map<string, T>,
     ttl?: number,
   ): Promise<void> {
@@ -70,7 +79,7 @@ abstract class Cache {
     return this._hasKeys(keys)
   }
 
-  public async getOrSetEntry<T>(
+  public async getOrSetEntry<T extends JsonValue>(
     key: string,
     fn: () => Promise<T>,
     ttl?: number,
@@ -88,11 +97,11 @@ abstract class Cache {
     return value
   }
 
-  private serialize<T>(value: T): string {
+  private serialize<T extends JsonValue>(value: T): string {
     return JSON.stringify(value)
   }
 
-  private deserialize<T>(value: string): T {
+  private deserialize<T extends JsonValue>(value: string): T {
     return JSON.parse(value) as T
   }
 
