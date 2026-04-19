@@ -17,9 +17,16 @@ const config = [
     ...typescript(),
   },
   {
+    files: ['*.js', '**/*.js', '*.ts', '**/*.ts'],
     rules: {
       'import/no-deprecated': 'off',
       'no-underscore-dangle': 'off',
+    },
+  },
+  {
+    files: ['*.ts', '**/*.ts'],
+    rules: {
+      'no-undef': 'off',
     },
   },
 ]
