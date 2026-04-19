@@ -1,6 +1,6 @@
 import { KeyError } from './errors/KeyError.js'
 
-const MAX_KEY_LENGTH = 512
+const MAX_KEY_LENGTH = 250
 
 const validateKey = (key: string): void => {
   if (key.length === 0) {
@@ -9,10 +9,6 @@ const validateKey = (key: string): void => {
 
   if (key.length > MAX_KEY_LENGTH) {
     throw new KeyError(key, `key exceeds ${MAX_KEY_LENGTH} characters`)
-  }
-
-  if (key !== key.trim()) {
-    throw new KeyError(key, 'key contains a leading or trailing whitespace')
   }
 
   for (let i = 0; i < key.length; i += 1) {

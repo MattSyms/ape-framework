@@ -4,9 +4,9 @@ abstract class Cache {
   public async getEntry<T>(key: string): Promise<T | undefined> {
     validateKey(key)
 
-    const raw = await this._getEntry(key)
+    const cached = await this._getEntry(key)
 
-    return raw === undefined ? undefined : this.deserialize<T>(raw)
+    return cached === undefined ? undefined : this.deserialize<T>(cached)
   }
 
   public async setEntry<T>(key: string, value: T, ttl?: number): Promise<void> {
@@ -24,17 +24,17 @@ abstract class Cache {
   public async hasEntry(key: string): Promise<boolean> {
     validateKey(key)
 
-    return this._hasEntry(key)
+    return this._hasKey(key)
   }
 
   public async getEntries<T>(keys: string[]): Promise<Map<string, T>> {
     keys.forEach(validateKey)
 
-    const raw = await this._getEntries(keys)
+    const cached = await this._getEntries(keys)
 
     const result = new Map<string, T>()
 
-    for (const [key, value] of raw) {
+    for (const [key, value] of cached) {
       result.set(key, this.deserialize<T>(value))
     }
 
@@ -67,7 +67,7 @@ abstract class Cache {
   public async hasEntries(keys: string[]): Promise<Set<string>> {
     keys.forEach(validateKey)
 
-    return this._hasEntries(keys)
+    return this._hasKeys(keys)
   }
 
   public async getOrSetEntry<T>(
@@ -75,17 +75,15 @@ abstract class Cache {
     fn: () => Promise<T>,
     ttl?: number,
   ): Promise<T> {
-    validateKey(key)
+    const cached = await this.getEntry<T>(key)
 
-    const raw = await this._getEntry(key)
-
-    if (raw !== undefined) {
-      return this.deserialize<T>(raw)
+    if (cached !== undefined) {
+      return cached
     }
 
     const value = await fn()
 
-    await this._setEntry(key, this.serialize(value), ttl)
+    await this.setEntry(key, value, ttl)
 
     return value
   }
@@ -112,7 +110,7 @@ abstract class Cache {
 
   protected abstract _deleteEntry(key: string): Promise<void>
 
-  protected abstract _hasEntry(key: string): Promise<boolean>
+  protected abstract _hasKey(key: string): Promise<boolean>
 
   protected abstract _getEntries(keys: string[]): Promise<Map<string, string>>
 
@@ -123,7 +121,7 @@ abstract class Cache {
 
   protected abstract _deleteEntries(keys: string[]): Promise<void>
 
-  protected abstract _hasEntries(keys: string[]): Promise<Set<string>>
+  protected abstract _hasKeys(keys: string[]): Promise<Set<string>>
 }
 
 export {
