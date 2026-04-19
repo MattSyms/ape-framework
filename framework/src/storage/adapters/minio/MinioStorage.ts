@@ -8,10 +8,6 @@ import type { Metadata } from '../../Metadata.js'
 import type { Object } from '../../Object.js'
 import type { Stat } from '../../Stat.js'
 
-const EXCLUDED_METADATA_KEYS = new Set([
-  'content-type',
-])
-
 class MinioStorage extends Storage {
   private readonly client: Client
 
@@ -19,7 +15,7 @@ class MinioStorage extends Storage {
 
   private readonly bucket: string
 
-  private readonly concurrency: number
+  private readonly batchSize: number
 
   public constructor(params: {
     host: string,
@@ -29,7 +25,7 @@ class MinioStorage extends Storage {
     secretKey: string,
     bucket: string,
     region?: string,
-    concurrency?: number,
+    batchSize?: number,
   }) {
     super()
 
@@ -48,7 +44,7 @@ class MinioStorage extends Storage {
     })
 
     this.bucket = params.bucket
-    this.concurrency = params.concurrency ?? 100
+    this.batchSize = params.batchSize ?? 100
   }
 
   public async close(): Promise<void> {
@@ -144,7 +140,7 @@ class MinioStorage extends Storage {
       if (item.name) {
         batch.push(item.name)
 
-        if (batch.length >= this.concurrency) {
+        if (batch.length >= this.batchSize) {
           await this.client.removeObjects(this.bucket, batch)
           batch.length = 0
         }
@@ -162,7 +158,7 @@ class MinioStorage extends Storage {
     const metadata: Metadata = {}
 
     for (const [key, value] of Object.entries(metaData)) {
-      if (!EXCLUDED_METADATA_KEYS.has(key)) {
+      if (key !== 'content-type') {
         metadata[key] = value
       }
     }
