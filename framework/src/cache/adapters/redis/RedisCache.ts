@@ -20,6 +20,10 @@ class RedisCache extends Cache {
     database?: number,
     keyPrefix?: string,
     batchSize?: number,
+    connectionTimeout?: number,
+    connectionKeepAlive?: number,
+    commandTimeout?: number,
+    commandMaxRetries?: number,
   }) {
     super()
 
@@ -35,6 +39,10 @@ class RedisCache extends Cache {
       password: params.password,
       db: params.database ?? 0,
       lazyConnect: true,
+      connectTimeout: params.connectionTimeout ?? 10000,
+      keepAlive: params.connectionKeepAlive ?? 30000,
+      commandTimeout: params.commandTimeout ?? 5000,
+      maxRetriesPerRequest: params.commandMaxRetries ?? 3,
     })
 
     this.keyPrefix = params.keyPrefix === undefined
