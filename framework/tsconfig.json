@@ -1,12 +1,16 @@
 {
   "compilerOptions": {
     "noEmit": true,
-    "baseUrl": "src",
+    "paths": {
+      "*": ["./src/*"]
+    },
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "target": "ESNext",
     "skipLibCheck": true,
-    "strict": true
+    "strict": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true
   },
   "include": [
     "bin",
