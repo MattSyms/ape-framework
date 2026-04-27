@@ -9,22 +9,21 @@ const config = [
     ],
   },
   {
-    files: ['*.js', '**/*.js'],
+    files: ['**/*.js'],
     ...javascript(),
   },
   {
-    files: ['*.ts', '**/*.ts'],
+    files: ['**/*.ts'],
     ...typescript(),
   },
   {
-    files: ['*.js', '**/*.js', '*.ts', '**/*.ts'],
     rules: {
       'import/no-deprecated': 'off',
       'no-underscore-dangle': 'off',
     },
   },
   {
-    files: ['*.ts', '**/*.ts'],
+    files: ['**/*.ts'],
     rules: {
       'no-undef': 'off',
     },

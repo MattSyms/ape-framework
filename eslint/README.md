@@ -25,21 +25,20 @@ const config = [
     ignores: [],
   },
   {
-    files: ['*.js', '**/*.js'],
+    files: ['**/*.js'],
     ...javascript(),
   },
   {
-    files: ['*.ts', '**/*.ts'],
+    files: ['**/*.ts'],
     ...typescript(),
   },
   {
-    files: ['*.js', '**/*.js', '*.ts', '**/*.ts'],
     rules: {
       // base rules override
     },
   },
   {
-    files: ['*.ts', '**/*.ts'],
+    files: ['**/*.ts'],
     rules: {
       // typescript rules override
     },
@@ -63,31 +62,30 @@ const config = [
     ignores: [],
   },
   {
-    files: ['*.js', '**/*.js'],
+    files: ['**/*.js'],
     ...javascript(),
   },
   {
-    files: ['*.ts', '**/*.ts'],
+    files: ['**/*.ts'],
     ...typescript('browser'),
   },
   {
-    files: ['*.vue', '**/*.vue'],
+    files: ['**/*.vue'],
     ...vue(),
   },
   {
-    files: ['*.js', '**/*.js', '*.ts', '**/*.ts', '*.vue', '**/*.vue'],
     rules: {
       // base rules override
     },
   },
   {
-    files: ['*.ts', '**/*.ts', '*.vue', '**/*.vue'],
+    files: ['**/*.ts', '**/*.vue'],
     rules: {
       // typescript rules override
     },
   },
   {
-    files: ['*.vue', '**/*.vue'],
+    files: ['**/*.vue'],
     rules: {
       // vue rules override
     },
