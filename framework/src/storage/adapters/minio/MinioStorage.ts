@@ -88,7 +88,7 @@ class MinioStorage extends Storage {
     }
   }
 
-  protected async* _getObjects(prefix: string): AsyncGenerator<Stat> {
+  protected async* _listObjects(prefix: string): AsyncGenerator<Stat> {
     const stream = this.client.listObjects(this.bucket, prefix, true)
 
     for await (const item of stream) {

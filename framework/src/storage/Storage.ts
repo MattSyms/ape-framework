@@ -22,10 +22,10 @@ abstract class Storage {
     return this._getObjectInfo(key)
   }
 
-  public async* getObjects(prefix: string): AsyncGenerator<Stat> {
+  public async* listObjects(prefix: string): AsyncGenerator<Stat> {
     validateKey(prefix, true)
 
-    yield* this._getObjects(prefix)
+    yield* this._listObjects(prefix)
   }
 
   public async setObject(params: {
@@ -70,7 +70,7 @@ abstract class Storage {
       }
     }
 
-    const descendants = this._getObjects(`${key}/`)
+    const descendants = this._listObjects(`${key}/`)
 
     const first = await descendants.next()
 
@@ -85,7 +85,7 @@ abstract class Storage {
 
   protected abstract _getObjectInfo(key: string): Promise<Info | undefined>
 
-  protected abstract _getObjects(prefix: string): AsyncGenerator<Stat>
+  protected abstract _listObjects(prefix: string): AsyncGenerator<Stat>
 
   protected abstract _setObject(params: {
     key: string,

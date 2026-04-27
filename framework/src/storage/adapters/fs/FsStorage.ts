@@ -53,7 +53,7 @@ class FsStorage extends Storage {
     return this.readInfo(key)
   }
 
-  protected async* _getObjects(prefix: string): AsyncGenerator<Stat> {
+  protected async* _listObjects(prefix: string): AsyncGenerator<Stat> {
     for await (const key of this.getKeysByPrefix(prefix)) {
       const info = await this.readInfo(key)
 
