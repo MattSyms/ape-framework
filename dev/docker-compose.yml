@@ -8,13 +8,3 @@ services:
       - 3000-3009:3000-3009
     volumes:
       - ..:/home/node/ape-framework
-
-  redis:
-    image: redis
-    ports:
-      - ${REDIS_PORT:-6379}:6379
-    volumes:
-      - redis-data:/data
-
-volumes:
-  redis-data:
