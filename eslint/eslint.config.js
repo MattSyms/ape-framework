@@ -1,5 +1,5 @@
-import javascript from '@apeframework/eslint/javascript'
-import typescript from '@apeframework/eslint/typescript'
+import { javascript } from '@apeframework/eslint/configs/javascript'
+import { typescript } from '@apeframework/eslint/configs/typescript'
 
 const config = [
   {
