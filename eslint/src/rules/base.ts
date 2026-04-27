@@ -388,9 +388,7 @@ const baseRules: Rules<''> = {
   ],
   'no-undef-init': 'off',
   'no-undefined': 'off',
-  'no-underscore-dangle': [
-    'error',
-  ],
+  'no-underscore-dangle': 'off',
   'no-unexpected-multiline': [
     'error',
   ],
@@ -571,5 +569,5 @@ const baseRules: Rules<''> = {
 }
 
 export {
-  baseRules as default,
+  baseRules,
 }

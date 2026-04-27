@@ -25,7 +25,7 @@ for (const [ruleset, getRules] of Object.entries(ruleGetters)) {
   const rules = await getRules()
 
   const projectRules = Object.keys(
-    (await import(`rules/${ruleset}.js`)).default,
+    (await import(`rules/${ruleset}.js`))[`${ruleset}Rules`],
   )
 
   rules.forEach((rule) => {

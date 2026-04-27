@@ -135,5 +135,5 @@ const importRules: Rules<'import/'> = {
 }
 
 export {
-  importRules as default,
+  importRules,
 }

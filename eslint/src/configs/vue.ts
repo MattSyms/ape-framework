@@ -3,16 +3,17 @@ import importPlugin from 'eslint-plugin-import'
 import vuePlugin from 'eslint-plugin-vue'
 import typescriptPlugin from 'typescript-eslint'
 import vueParser from 'vue-eslint-parser'
-import { getGlobals } from './getGlobals.js'
-import baseRules from './rules/base.js'
-import importRules from './rules/import.js'
-import stylisticRules from './rules/stylistic.js'
-import typescriptRules from './rules/typescript.js'
-import typescriptDisabledRules from './rules/typescriptDisabled.js'
-import vueRules from './rules/vue.js'
-import type { Config } from './Config.js'
+import { getGlobals } from '../getGlobals.js'
+import { baseRules } from '../rules/base.js'
+import { importRules } from '../rules/import.js'
+import { stylisticRules } from '../rules/stylistic.js'
+import { typescriptRules } from '../rules/typescript.js'
+import { typescriptDisabledRules } from '../rules/typescriptDisabled.js'
+import { typescriptGloballyDisabledRules } from '../rules/typescriptGloballyDisabled.js'
+import { vueRules } from '../rules/vue.js'
+import type { Config } from '../Config.js'
 
-const vueConfig = (): Config => {
+const vue = (): Config => {
   return {
     plugins: {
       'import': importPlugin,
@@ -39,6 +40,7 @@ const vueConfig = (): Config => {
       ...baseRules,
       ...importRules,
       ...stylisticRules,
+      ...typescriptGloballyDisabledRules,
       ...typescriptDisabledRules,
       ...typescriptRules,
       ...vueRules,
@@ -47,5 +49,5 @@ const vueConfig = (): Config => {
 }
 
 export {
-  vueConfig as default,
+  vue,
 }

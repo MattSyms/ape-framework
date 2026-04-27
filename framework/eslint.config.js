@@ -19,14 +19,11 @@ const config = [
   {
     rules: {
       'import/no-deprecated': 'off',
-      'no-underscore-dangle': 'off',
     },
   },
   {
     files: ['**/*.ts'],
-    rules: {
-      'no-undef': 'off',
-    },
+    rules: {},
   },
 ]
 

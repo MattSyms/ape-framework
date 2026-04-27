@@ -343,5 +343,5 @@ const typescriptRules: Rules<'typescript/'> = {
 }
 
 export {
-  typescriptRules as default,
+  typescriptRules,
 }

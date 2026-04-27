@@ -29,5 +29,5 @@ const typescriptDisabledRules: Rules<''> = {
 }
 
 export {
-  typescriptDisabledRules as default,
+  typescriptDisabledRules,
 }

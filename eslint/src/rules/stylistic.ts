@@ -111,17 +111,14 @@ const stylisticRules: Rules<'stylistic/'> = {
   'stylistic/jsx-equals-spacing': 'off',
   'stylistic/jsx-first-prop-new-line': 'off',
   'stylistic/jsx-function-call-newline': 'off',
-  'stylistic/jsx-indent': 'off',
   'stylistic/jsx-indent-props': 'off',
   'stylistic/jsx-max-props-per-line': 'off',
   'stylistic/jsx-newline': 'off',
   'stylistic/jsx-one-expression-per-line': 'off',
   'stylistic/jsx-pascal-case': 'off',
-  'stylistic/jsx-props-no-multi-spaces': 'off',
   'stylistic/jsx-props-style': 'off',
   'stylistic/jsx-quotes': 'off',
   'stylistic/jsx-self-closing-comp': 'off',
-  'stylistic/jsx-sort-props': 'off',
   'stylistic/jsx-tag-spacing': 'off',
   'stylistic/jsx-wrap-multilines': 'off',
   'stylistic/key-spacing': [
@@ -359,5 +356,5 @@ const stylisticRules: Rules<'stylistic/'> = {
 }
 
 export {
-  stylisticRules as default,
+  stylisticRules,
 }

@@ -438,10 +438,16 @@ const vueRules = {
   'vue/prefer-separate-static-class': [
     'error',
   ],
+  'vue/prefer-single-event-payload': [
+    'error',
+  ],
   'vue/prefer-true-attribute-shorthand': [
     'error',
   ],
   'vue/prefer-use-template-ref': [
+    'error',
+  ],
+  'vue/prefer-v-model': [
     'error',
   ],
   'vue/prop-name-casing': [
@@ -627,5 +633,5 @@ const vueRules = {
 }
 
 export {
-  vueRules as default,
+  vueRules,
 }

@@ -17,8 +17,8 @@ yarn add @apeframework/eslint --dev
 Node configuration:
 
 ```js
-import javascript from '@apeframework/eslint/javascript'
-import typescript from '@apeframework/eslint/typescript'
+import { javascript } from '@apeframework/eslint/configs/javascript'
+import { typescript } from '@apeframework/eslint/configs/typescript'
 
 const config = [
   {
@@ -53,9 +53,9 @@ export {
 Browser configuration:
 
 ```js
-import javascript from '@apeframework/eslint/javascript'
-import typescript from '@apeframework/eslint/typescript'
-import vue from '@apeframework/eslint/vue'
+import { javascript } from '@apeframework/eslint/configs/javascript'
+import { typescript } from '@apeframework/eslint/configs/typescript'
+import { vue } from '@apeframework/eslint/configs/vue'
 
 const config = [
   {
