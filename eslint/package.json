@@ -14,11 +14,11 @@
     "node": ">=22"
   },
   "dependencies": {
-    "@stylistic/eslint-plugin": "^5.9",
+    "@stylistic/eslint-plugin": "^5.10",
     "eslint-plugin-import": "^2.32",
-    "eslint-plugin-vue": "^10.8",
-    "globals": "^17.4",
-    "typescript-eslint": "^8.56",
+    "eslint-plugin-vue": "^10.9",
+    "globals": "^17.5",
+    "typescript-eslint": "^8.59",
     "vue-eslint-parser": "^10.4"
   },
   "peerDependencies": {
@@ -27,12 +27,12 @@
   "devDependencies": {
     "@apeframework/eslint": "v0.0.0-dev.47",
     "@types/fs-extra": "^11.0",
-    "@types/node": "^25.3",
+    "@types/node": "^25.6",
     "cheerio": "^1.2",
     "eslint": "^9.39",
     "fs-extra": "^11.3",
-    "npm-check-updates": "^19.6",
+    "npm-check-updates": "^22.0",
     "tsx": "^4.21",
-    "typescript": "^5.9"
+    "typescript": "^6.0"
   }
 }

@@ -1,8 +1,5 @@
 /*
  * Usage: yarn package <version>
- *
- *   Package build:
- *     yarn package 0.0.0-dev.0
  */
 import fs from 'fs-extra'
 
