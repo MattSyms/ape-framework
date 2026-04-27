@@ -1,3 +1,4 @@
+/* eslint-disable import/no-deprecated */
 import http from 'node:http'
 import https from 'node:https'
 import { Readable } from 'node:stream'
