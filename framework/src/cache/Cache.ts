@@ -2,44 +2,44 @@ import { validateKey } from './validateKey.js'
 import type { Value } from './Value.js'
 
 abstract class Cache {
-  public async getEntry<T extends Value>(
+  public async get<T extends Value>(
     key: string,
   ): Promise<T | undefined> {
     validateKey(key)
 
-    const cached = await this._getEntry(key)
+    const cached = await this._get(key)
 
     return cached === undefined ? undefined : this.deserialize<T>(cached)
   }
 
-  public async setEntry<T extends Value>(
+  public async set<T extends Value>(
     key: string,
     value: T,
     ttl?: number,
   ): Promise<void> {
     validateKey(key)
 
-    return this._setEntry(key, this.serialize(value), ttl)
+    return this._set(key, this.serialize(value), ttl)
   }
 
-  public async deleteEntry(key: string): Promise<void> {
+  public async delete(key: string): Promise<void> {
     validateKey(key)
 
-    return this._deleteEntry(key)
+    return this._delete(key)
   }
 
-  public async hasKey(key: string): Promise<boolean> {
+  public async has(key: string): Promise<boolean> {
     validateKey(key)
 
-    return this._hasKey(key)
+    return this._has(key)
   }
 
-  public async getEntries<T extends Value>(
+  public async getMany<T extends Value>(
     keys: string[],
   ): Promise<Map<string, T>> {
     keys.forEach(validateKey)
 
-    const cached = await this._getEntries(keys)
+    const cached = await this._getMany(keys)
 
     const result = new Map<string, T>()
 
@@ -50,7 +50,7 @@ abstract class Cache {
     return result
   }
 
-  public async setEntries<T extends Value>(
+  public async setMany<T extends Value>(
     entries: Map<string, T>,
     ttl?: number,
   ): Promise<void> {
@@ -64,27 +64,27 @@ abstract class Cache {
       serialized.set(key, this.serialize(value))
     }
 
-    return this._setEntries(serialized, ttl)
+    return this._setMany(serialized, ttl)
   }
 
-  public async deleteEntries(keys: string[]): Promise<void> {
+  public async deleteMany(keys: string[]): Promise<void> {
     keys.forEach(validateKey)
 
-    return this._deleteEntries(keys)
+    return this._deleteMany(keys)
   }
 
-  public async hasKeys(keys: string[]): Promise<Set<string>> {
+  public async hasMany(keys: string[]): Promise<Set<string>> {
     keys.forEach(validateKey)
 
-    return this._hasKeys(keys)
+    return this._hasMany(keys)
   }
 
-  public async getOrSetEntry<T extends Value>(
+  public async getOrSet<T extends Value>(
     key: string,
     fn: () => Promise<T>,
     ttl?: number,
   ): Promise<T> {
-    const cached = await this.getEntry<T>(key)
+    const cached = await this.get<T>(key)
 
     if (cached !== undefined) {
       return cached
@@ -92,7 +92,7 @@ abstract class Cache {
 
     const value = await fn()
 
-    await this.setEntry(key, value, ttl)
+    await this.set(key, value, ttl)
 
     return value
   }
@@ -109,28 +109,28 @@ abstract class Cache {
 
   public abstract close(): Promise<void>
 
-  protected abstract _getEntry(key: string): Promise<string | undefined>
+  protected abstract _get(key: string): Promise<string | undefined>
 
-  protected abstract _setEntry(
+  protected abstract _set(
     key: string,
     value: string,
     ttl?: number
   ): Promise<void>
 
-  protected abstract _deleteEntry(key: string): Promise<void>
+  protected abstract _delete(key: string): Promise<void>
 
-  protected abstract _hasKey(key: string): Promise<boolean>
+  protected abstract _has(key: string): Promise<boolean>
 
-  protected abstract _getEntries(keys: string[]): Promise<Map<string, string>>
+  protected abstract _getMany(keys: string[]): Promise<Map<string, string>>
 
-  protected abstract _setEntries(
+  protected abstract _setMany(
     entries: Map<string, string>,
     ttl?: number
   ): Promise<void>
 
-  protected abstract _deleteEntries(keys: string[]): Promise<void>
+  protected abstract _deleteMany(keys: string[]): Promise<void>
 
-  protected abstract _hasKeys(keys: string[]): Promise<Set<string>>
+  protected abstract _hasMany(keys: string[]): Promise<Set<string>>
 }
 
 export {

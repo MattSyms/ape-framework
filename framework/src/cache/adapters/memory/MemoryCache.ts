@@ -30,11 +30,11 @@ class MemoryCache extends Cache {
     this.store.clear()
   }
 
-  protected async _getEntry(key: string): Promise<string | undefined> {
+  protected async _get(key: string): Promise<string | undefined> {
     return this.read(key, true, Date.now())
   }
 
-  protected async _setEntry(
+  protected async _set(
     key: string,
     value: string,
     ttl?: number,
@@ -42,15 +42,15 @@ class MemoryCache extends Cache {
     this.write(key, value, ttl)
   }
 
-  protected async _deleteEntry(key: string): Promise<void> {
+  protected async _delete(key: string): Promise<void> {
     this.store.delete(key)
   }
 
-  protected async _hasKey(key: string): Promise<boolean> {
+  protected async _has(key: string): Promise<boolean> {
     return this.read(key, false, Date.now()) !== undefined
   }
 
-  protected async _getEntries(keys: string[]): Promise<Map<string, string>> {
+  protected async _getMany(keys: string[]): Promise<Map<string, string>> {
     const now = Date.now()
 
     const entries = new Map<string, string>()
@@ -66,7 +66,7 @@ class MemoryCache extends Cache {
     return entries
   }
 
-  protected async _setEntries(
+  protected async _setMany(
     entries: Map<string, string>,
     ttl?: number,
   ): Promise<void> {
@@ -75,13 +75,13 @@ class MemoryCache extends Cache {
     }
   }
 
-  protected async _deleteEntries(keys: string[]): Promise<void> {
+  protected async _deleteMany(keys: string[]): Promise<void> {
     for (const key of keys) {
       this.store.delete(key)
     }
   }
 
-  protected async _hasKeys(keys: string[]): Promise<Set<string>> {
+  protected async _hasMany(keys: string[]): Promise<Set<string>> {
     const now = Date.now()
 
     const result = new Set<string>()
