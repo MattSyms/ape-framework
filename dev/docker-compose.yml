@@ -1,3 +1,5 @@
+name: ape-framework
+
 services:
   node:
     image: node:22
