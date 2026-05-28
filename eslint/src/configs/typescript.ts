@@ -11,7 +11,7 @@ import { typescriptGloballyDisabledRules } from '../rules/typescriptGloballyDisa
 import type { Config } from '../Config.js'
 import type { Globals } from '../Globals.js'
 
-const typescript = (globals: Globals | undefined): Config => {
+const typescript = (globals?: Globals): Config => {
   return {
     plugins: {
       'import': importPlugin,

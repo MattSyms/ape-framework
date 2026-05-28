@@ -7,7 +7,7 @@ import { stylisticRules } from '../rules/stylistic.js'
 import type { Config } from '../Config.js'
 import type { Globals } from '../Globals.js'
 
-const javascript = (globals: Globals | undefined): Config => {
+const javascript = (globals?: Globals): Config => {
   return {
     plugins: {
       'import': importPlugin,
